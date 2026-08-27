@@ -48,9 +48,10 @@ app.use(cors({
   },
   credentials: true,
 }));
-// Body text is pre-truncated on the frontend to 15 KB; 2 MB covers all cases.
-app.use(express.json({ limit: '2mb' }));
-app.use(express.urlencoded({ limit: '2mb', extended: true }));
+// Body text is truncated to 15 KB in the controller, but we allow 50 MB here
+// so old cached browser bundles (without truncation) never trigger a 413.
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 app.get('/api/health', (_req, res) => {
   res.json({
