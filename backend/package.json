@@ -1,0 +1,19 @@
+{
+  "name": "notice2action-backend",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch server.js",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "mongoose": "^8.9.5",
+    "multer": "^1.4.5-lts.1",
+    "openai": "^4.77.0",
+    "pdf-parse": "^1.1.1",
+    "zod": "^3.24.1"
+  }
+}
