@@ -2,7 +2,7 @@ import pdfParse from 'pdf-parse';
 
 const pdf = pdfParse.default || pdfParse;
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 export async function extractTextFromPdf(buffer) {
   try {
@@ -37,7 +37,7 @@ export function validateFile(file) {
     return { valid: false, message: 'No file provided.' };
   }
   if (file.size > MAX_FILE_SIZE) {
-    return { valid: false, message: 'File is too large. Maximum size is 5 MB.' };
+    return { valid: false, message: 'File is too large. Maximum size is 10 MB.' };
   }
 
   const allowed = [

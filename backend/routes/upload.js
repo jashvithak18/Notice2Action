@@ -15,7 +15,7 @@ router.post('/', protect, (req, res, next) => {
   upload.single('file')(req, res, (err) => {
     if (err instanceof multer.MulterError) {
       if (err.code === 'LIMIT_FILE_SIZE') {
-        return res.status(400).json({ error: 'File is too large. Maximum size is 5 MB.' });
+        return res.status(400).json({ error: 'File is too large. Maximum size is 10 MB.' });
       }
       return res.status(400).json({ error: 'File upload failed. Please try again.' });
     }
