@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_URL || '';
+const API_BASE = import.meta.env.VITE_API_URL || 'https://notice2action.onrender.com';
 
 function getAuthHeaders(extraHeaders = {}) {
   const token = localStorage.getItem('n2a_token');
