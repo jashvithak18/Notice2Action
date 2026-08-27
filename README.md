@@ -2,7 +2,7 @@
 
 Turn confusing official notices into clear next steps.
 
-🚀 **Live App:** [https://notice2action.onrender.com](https://notice2action.onrender.com)
+🚀 **Live App:** [https://notice2-action.vercel.app/](https://notice2-action.vercel.app/)
 
 ## Problem
 
