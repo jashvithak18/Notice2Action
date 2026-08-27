@@ -81,6 +81,11 @@ app.get('*', (req, res, next) => {
   if (req.path.startsWith('/api')) return next();
   const indexPath = path.join(frontendDist, 'index.html');
   if (fs.existsSync(indexPath)) {
+    res.set({
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+    });
     return res.sendFile(indexPath);
   }
   next();
