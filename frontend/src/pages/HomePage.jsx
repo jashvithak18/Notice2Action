@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import NoticeInput from '../components/NoticeInput';
 import LoadingStages from '../components/LoadingStages';
@@ -7,6 +7,7 @@ import { analyzeNotice, fetchSamples, fetchSampleText } from '../services/api';
 
 export default function HomePage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [text, setText] = useState('');
   const [fileName, setFileName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -16,11 +17,16 @@ export default function HomePage() {
 
   useEffect(() => {
     fetchSamples()
-      .then(setSamples)
+      .then((data) => {
+        setSamples(data);
+        if (location.state?.sampleId) {
+          handleLoadSample(location.state.sampleId);
+        }
+      })
       .catch(() => {
         /* samples optional if backend down */
       });
-  }, []);
+  }, [location.state?.sampleId]);
 
   const handleAnalyze = async () => {
     setError('');
