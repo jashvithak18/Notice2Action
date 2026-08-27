@@ -208,6 +208,12 @@ export default function NoticeInput({
           Add a bit more text — we need at least {MIN_LENGTH} characters to analyze.
         </p>
       )}
+
+      {text.trim().length >= MIN_LENGTH && text.length > 12000 && (
+        <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200/80 rounded-lg px-3 py-2">
+          ⚠️ Long notice detected — only the first 15,000 characters will be sent for analysis.
+        </p>
+      )}
     </div>
   );
 }
