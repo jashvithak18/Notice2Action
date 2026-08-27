@@ -11,7 +11,7 @@ services:
       - key: OPENAI_API_KEY
         sync: false
       - key: OPENAI_MODEL
-        value: groq/compound
+        value: groq/compound-mini
       - key: MONGODB_URI
         sync: false
       - key: VITE_API_URL

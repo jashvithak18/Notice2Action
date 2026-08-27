@@ -151,48 +151,17 @@ export async function analyzeNotice(text, sampleId) {
 
   const apiKey = getApiKey();
   const isGroq = apiKey?.startsWith('gsk_') || process.env.OPENAI_BASE_URL?.includes('groq');
-  let model = process.env.OPENAI_MODEL;
-  if (!model || (isGroq && model === 'gpt-4o-mini')) {
-    model = isGroq ? 'groq/compound' : 'gpt-4o-mini';
-  }
 
-  try {
-    let response;
-    if (isGroq) {
-      response = await client.chat.completions.create({
-        model,
-        messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
-          {
-            role: 'user',
-            content: `Analyze the following official notice and return structured JSON:\n\n${text}`,
-          },
-        ],
-        response_format: { type: 'json_object' },
-        temperature: 0.2,
-      });
-    } else {
-      try {
-        response = await client.chat.completions.create({
-          model,
-          messages: [
-            { role: 'system', content: SYSTEM_PROMPT },
-            {
-              role: 'user',
-              content: `Analyze the following official notice and return structured JSON:\n\n${text}`,
-            },
-          ],
-          response_format: {
-            type: 'json_schema',
-            json_schema: {
-              name: 'notice_analysis',
-              strict: true,
-              schema: JSON_SCHEMA,
-            },
-          },
-          temperature: 0.2,
-        });
-      } catch (schemaErr) {
+  const modelsToTry = isGroq
+    ? ['groq/compound-mini', 'openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'qwen/qwen3.8-27b']
+    : [process.env.OPENAI_MODEL || 'gpt-4o-mini', 'gpt-4o'];
+
+  let lastErr = null;
+
+  for (const model of modelsToTry) {
+    try {
+      let response;
+      if (isGroq) {
         response = await client.chat.completions.create({
           model,
           messages: [
@@ -205,56 +174,89 @@ export async function analyzeNotice(text, sampleId) {
           response_format: { type: 'json_object' },
           temperature: 0.2,
         });
+      } else {
+        try {
+          response = await client.chat.completions.create({
+            model,
+            messages: [
+              { role: 'system', content: SYSTEM_PROMPT },
+              {
+                role: 'user',
+                content: `Analyze the following official notice and return structured JSON:\n\n${text}`,
+              },
+            ],
+            response_format: {
+              type: 'json_schema',
+              json_schema: {
+                name: 'notice_analysis',
+                strict: true,
+                schema: JSON_SCHEMA,
+              },
+            },
+            temperature: 0.2,
+          });
+        } catch (schemaErr) {
+          response = await client.chat.completions.create({
+            model,
+            messages: [
+              { role: 'system', content: SYSTEM_PROMPT },
+              {
+                role: 'user',
+                content: `Analyze the following official notice and return structured JSON:\n\n${text}`,
+              },
+            ],
+            response_format: { type: 'json_object' },
+            temperature: 0.2,
+          });
+        }
       }
-    }
 
-    const content = response.choices[0]?.message?.content;
-    if (!content) {
-      throw new Error('Empty response from AI service.');
-    }
+      const content = response.choices[0]?.message?.content;
+      if (!content) {
+        throw new Error('Empty response from AI service.');
+      }
 
-    let parsed;
-    try {
-      parsed = JSON.parse(content);
-    } catch {
-      throw new Error('AI returned malformed data. Please try again.');
-    }
+      let parsed;
+      try {
+        parsed = JSON.parse(content);
+      } catch {
+        throw new Error('AI returned malformed data. Please try again.');
+      }
 
-    if (parsed.deadlines) {
-      parsed.deadlines = normalizeDeadlines(parsed.deadlines);
-    }
-    if (!Array.isArray(parsed.eligibility)) {
-      parsed.eligibility = parsed.eligibility ? [String(parsed.eligibility)] : [];
-    }
-    if (!Array.isArray(parsed.checklist)) {
-      parsed.checklist = parsed.checklist ? [String(parsed.checklist)] : [];
-    }
+      if (parsed.deadlines) {
+        parsed.deadlines = normalizeDeadlines(parsed.deadlines);
+      }
+      if (!Array.isArray(parsed.eligibility)) {
+        parsed.eligibility = parsed.eligibility ? [String(parsed.eligibility)] : [];
+      }
+      if (!Array.isArray(parsed.checklist)) {
+        parsed.checklist = parsed.checklist ? [String(parsed.checklist)] : [];
+      }
 
-    parsed.quickTake = cleanQuickTake(parsed.quickTake);
+      parsed.quickTake = cleanQuickTake(parsed.quickTake);
 
-    const validation = validateAnalysis(parsed);
-    if (!validation.success) {
-      console.error('Validation failure details:', validation.error.format());
-      throw new Error('AI response did not match expected format. Please try again.');
+      const validation = validateAnalysis(parsed);
+      if (!validation.success) {
+        console.error('Validation failure details:', validation.error.format());
+        throw new Error('AI response did not match expected format. Please try again.');
+      }
+
+      return validation.data;
+    } catch (err) {
+      console.warn(`Model ${model} failed:`, err.message);
+      lastErr = err;
+      // Try next model in list
     }
-
-    return validation.data;
-
-    return validation.data;
-  } catch (err) {
-    if (fallback) {
-      console.warn('AI analysis failed, using sample fallback:', err.message);
-      return fallback;
-    }
-
-    if (err.status === 429) {
-      throw new Error('AI service is temporarily busy. Please wait a moment and try again.');
-    }
-
-    if (err.message) {
-      throw err;
-    }
-
-    throw new Error('Unable to analyze this notice right now. Please try again later.');
   }
+
+  if (fallback) {
+    console.warn('All AI models failed, using sample fallback');
+    return fallback;
+  }
+
+  if (lastErr?.status === 429) {
+    throw new Error('AI service is temporarily busy. Please wait a moment and try again.');
+  }
+
+  throw new Error(lastErr?.message || 'Unable to analyze this notice right now. Please try again later.');
 }
