@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: notice2action
+    env: node
+    plan: free
+    buildCommand: npm run build
+    startCommand: npm start
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        value: groq/compound
+      - key: MONGODB_URI
+        sync: false

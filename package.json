@@ -4,12 +4,12 @@
   "private": true,
   "description": "Turn confusing official notices into clear next steps",
   "scripts": {
-    "postinstall": "cd backend && npm install && cd ../frontend && npm install",
-    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "postinstall": "cd backend && npm install && cd ../frontend && npm install --include=dev",
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install --include=dev",
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:backend": "cd backend && npm run dev",
     "dev:frontend": "cd frontend && npm run dev",
-    "build": "cd frontend && npm run build",
+    "build": "cd frontend && npm install --include=dev && npm run build",
     "start": "cd backend && npm start"
   },
   "devDependencies": {
