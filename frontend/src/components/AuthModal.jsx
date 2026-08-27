@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Mail, Lock, User, ArrowRight, AlertCircle, Loader2 } from 'lucide-react';
+import { X, Mail, Lock, User, ArrowRight, AlertCircle, Loader2, Info } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import Logo from './Logo';
 
-export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
+export default function AuthModal({ isOpen, onClose, initialMode = 'login', message = '' }) {
   const { login, register } = useAuth();
   const [mode, setMode] = useState(initialMode); // 'login' | 'register'
   
@@ -95,10 +95,18 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
             </h2>
             <p className="text-xs sm:text-sm text-ink-secondary mt-1">
               {mode === 'login'
-                ? 'Sign in to access your saved notice history'
-                : 'Join Notice2Action to automatically track your notices'}
+                ? 'Sign in to analyze notices and view your saved history'
+                : 'Join Notice2Action to analyze notices and track deadlines'}
             </p>
           </div>
+
+          {/* Optional Action Message */}
+          {message && (
+            <div className="mb-4 flex items-center gap-2 text-xs text-accent bg-accent-light border border-accent/30 rounded-xl p-3">
+              <Info className="w-4 h-4 shrink-0 text-accent" />
+              <span className="font-medium">{message}</span>
+            </div>
+          )}
 
           {/* Mode Switcher Tabs */}
           <div className="flex bg-surface-muted p-1 rounded-xl mb-6">

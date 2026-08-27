@@ -1,5 +1,5 @@
 import { useRef, useState, useCallback } from 'react';
-import { Upload, X, FileText } from 'lucide-react';
+import { Upload, X, FileText, Lock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { uploadFile } from '../services/api';
 
@@ -15,6 +15,8 @@ export default function NoticeInput({
   onFileNameChange,
   samples,
   onLoadSample,
+  isAuthenticated = true,
+  onRequireAuth,
 }) {
   const fileInputRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -27,6 +29,10 @@ export default function NoticeInput({
   const handleFile = useCallback(
     async (file) => {
       if (!file) return;
+      if (!isAuthenticated) {
+        if (onRequireAuth) onRequireAuth();
+        return;
+      }
       setUploadError('');
       setIsUploading(true);
 
@@ -41,7 +47,7 @@ export default function NoticeInput({
         setIsUploading(false);
       }
     },
-    [onTextChange, onFileNameChange]
+    [onTextChange, onFileNameChange, isAuthenticated, onRequireAuth]
   );
 
   const onDrop = useCallback(
@@ -126,6 +132,12 @@ export default function NoticeInput({
             />
             <label
               htmlFor="file-upload"
+              onClick={(e) => {
+                if (!isAuthenticated) {
+                  e.preventDefault();
+                  if (onRequireAuth) onRequireAuth();
+                }
+              }}
               className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border border-border hover:border-border-strong hover:bg-surface-muted transition-colors cursor-pointer focus-ring ${
                 isLoading || isUploading ? 'opacity-50 pointer-events-none' : ''
               }`}
@@ -170,11 +182,26 @@ export default function NoticeInput({
         onClick={onAnalyze}
         disabled={!canAnalyze}
         whileTap={{ scale: canAnalyze ? 0.98 : 1 }}
-        className="w-full sm:w-auto px-8 py-3 bg-accent hover:bg-accent-hover disabled:bg-border-strong disabled:text-ink-muted text-white font-medium text-sm rounded-lg transition-colors focus-ring disabled:cursor-not-allowed"
+        className="w-full sm:w-auto px-8 py-3 bg-accent hover:bg-accent-hover disabled:bg-border-strong disabled:text-ink-muted text-white font-medium text-sm rounded-lg transition-colors focus-ring disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
         aria-label="Analyze notice"
       >
-        {isLoading ? 'Analyzing…' : isUploading ? 'Uploading…' : 'Analyze Notice'}
+        {!isAuthenticated && <Lock className="w-4 h-4 text-white/80" />}
+        <span>
+          {isLoading
+            ? 'Analyzing…'
+            : isUploading
+            ? 'Uploading…'
+            : !isAuthenticated
+            ? 'Sign in to Analyze'
+            : 'Analyze Notice'}
+        </span>
       </motion.button>
+
+      {!isAuthenticated && (
+        <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200/80 rounded-lg px-3 py-2">
+          🔒 Sign in required to run AI analysis and save notice history.
+        </p>
+      )}
 
       {text.trim().length > 0 && text.trim().length < MIN_LENGTH && (
         <p className="text-xs text-ink-muted">

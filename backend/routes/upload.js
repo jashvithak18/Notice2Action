@@ -2,6 +2,7 @@ import { Router } from 'express';
 import multer from 'multer';
 import { uploadFile } from '../controllers/uploadController.js';
 import { MAX_FILE_SIZE } from '../services/pdfService.js';
+import { protect } from '../middleware/authMiddleware.js';
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -10,7 +11,7 @@ const upload = multer({
 
 const router = Router();
 
-router.post('/', (req, res, next) => {
+router.post('/', protect, (req, res, next) => {
   upload.single('file')(req, res, (err) => {
     if (err instanceof multer.MulterError) {
       if (err.code === 'LIMIT_FILE_SIZE') {

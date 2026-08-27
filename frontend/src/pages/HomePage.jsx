@@ -3,17 +3,22 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import NoticeInput from '../components/NoticeInput';
 import LoadingStages from '../components/LoadingStages';
+import AuthModal from '../components/AuthModal';
+import { useAuth } from '../context/AuthContext';
 import { analyzeNotice, fetchSamples, fetchSampleText } from '../services/api';
 
 export default function HomePage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { isAuthenticated } = useAuth();
+  
   const [text, setText] = useState('');
   const [fileName, setFileName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [samples, setSamples] = useState([]);
   const [activeSampleId, setActiveSampleId] = useState('');
+  const [authModalOpen, setAuthModalOpen] = useState(false);
 
   useEffect(() => {
     fetchSamples()
@@ -29,6 +34,11 @@ export default function HomePage() {
   }, [location.state?.sampleId]);
 
   const handleAnalyze = async () => {
+    if (!isAuthenticated) {
+      setAuthModalOpen(true);
+      return;
+    }
+
     setError('');
     setIsLoading(true);
 
@@ -87,6 +97,8 @@ export default function HomePage() {
               onFileNameChange={setFileName}
               samples={samples}
               onLoadSample={handleLoadSample}
+              isAuthenticated={isAuthenticated}
+              onRequireAuth={() => setAuthModalOpen(true)}
             />
 
             {error && (
@@ -100,6 +112,14 @@ export default function HomePage() {
           </>
         )}
       </motion.div>
+
+      {/* Auth Modal Triggered when Unauthenticated user attempts analysis */}
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        initialMode="login"
+        message="Please sign in or create an account to analyze notices."
+      />
     </main>
   );
 }

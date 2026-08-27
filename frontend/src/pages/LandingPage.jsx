@@ -15,12 +15,16 @@ import {
   ListTodo
 } from 'lucide-react';
 import Logo from '../components/Logo';
+import AuthModal from '../components/AuthModal';
+import { useAuth } from '../context/AuthContext';
 import { fetchSamples, fetchSampleText, analyzeNotice } from '../services/api';
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const [samples, setSamples] = useState([]);
   const [loadingSampleId, setLoadingSampleId] = useState(null);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
 
   useEffect(() => {
     fetchSamples()
@@ -29,6 +33,10 @@ export default function LandingPage() {
   }, []);
 
   const handleTrySample = async (sampleId) => {
+    if (!isAuthenticated) {
+      setAuthModalOpen(true);
+      return;
+    }
     setLoadingSampleId(sampleId);
     try {
       const sample = await fetchSampleText(sampleId);
@@ -327,6 +335,14 @@ export default function LandingPage() {
           <p>© {new Date().getFullYear()} Notice2Action. Always verify deadlines with original official documents.</p>
         </div>
       </footer>
+
+      {/* Auth Modal Trigger */}
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        initialMode="login"
+        message="Please sign in or create an account to analyze notices."
+      />
     </div>
   );
 }
