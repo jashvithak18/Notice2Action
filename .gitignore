@@ -1,5 +1,4 @@
 node_modules/
-dist/
 build/
 .env
 .env.local
@@ -10,3 +9,5 @@ Thumbs.db
 .idea/
 coverage/
 *.local
+# Track frontend/dist so Render doesn't need to rebuild on every deploy
+!frontend/dist

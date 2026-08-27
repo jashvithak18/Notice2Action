@@ -3,8 +3,10 @@ services:
     name: notice2action
     env: node
     plan: free
-    buildCommand: npm install && npm run build
-    startCommand: npm start
+    # Frontend is pre-built and committed to git (frontend/dist).
+    # Render only needs to install backend dependencies.
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && node server.js
     envVars:
       - key: OPENAI_API_KEY
         sync: false
