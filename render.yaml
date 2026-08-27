@@ -12,3 +12,5 @@ services:
         value: groq/compound
       - key: MONGODB_URI
         sync: false
+      - key: VITE_API_URL
+        value: https://notice2action.onrender.com

@@ -2,6 +2,8 @@
 
 Turn confusing official notices into clear next steps.
 
+🚀 **Live App:** [https://notice2action.onrender.com](https://notice2action.onrender.com)
+
 ## Problem
 
 People receive long, formal notices from schools, government departments, banks, insurance companies, tax authorities, and utilities. These notices are hard to parse — deadlines get buried, eligibility is unclear, and it's not obvious what action to take next.
@@ -13,6 +15,11 @@ Notice2Action converts any notice into a structured breakdown:
 **Understand → Identify deadlines → Check eligibility → Take action**
 
 Paste or upload a notice, and get a plain-language summary, extracted deadlines, eligibility conditions, and an interactive action checklist.
+
+## Live Deployment
+
+- **Live URL:** [https://notice2action.onrender.com](https://notice2action.onrender.com)
+- **API Health Check:** [https://notice2action.onrender.com/api/health](https://notice2action.onrender.com/api/health)
 
 ## Features
 
@@ -32,15 +39,15 @@ Paste or upload a notice, and get a plain-language summary, extracted deadlines,
 
 **Backend:** Node.js, Express.js
 
-**Database:** MongoDB with Mongoose (optional)
+**Database:** MongoDB Atlas with Mongoose
 
-**AI:** OpenAI API with structured JSON output
+**AI:** Groq API / OpenAI API with structured JSON output
 
 ## Architecture
 
 ```
-User → React frontend → Express API → OpenAI (structured JSON)
-                                    → MongoDB (optional save)
+User → React frontend → Express API → Groq LLM (structured JSON)
+                                    → MongoDB Atlas (history save)
                     ← validated analysis ←
 ```
 
@@ -56,8 +63,8 @@ User → React frontend → Express API → OpenAI (structured JSON)
 ### Prerequisites
 
 - Node.js 18+
-- MongoDB (optional, for history)
-- OpenAI API key (optional for samples — fallback works without it)
+- MongoDB Atlas or local MongoDB
+- Groq / OpenAI API key
 
 ### Setup
 
@@ -66,9 +73,10 @@ User → React frontend → Express API → OpenAI (structured JSON)
 cd notice2action
 npm run install:all
 
-# Configure environment
-cp .env.example .env
-# Edit .env with your OPENAI_API_KEY and optionally MONGODB_URI
+# Configure environment in .env
+OPENAI_API_KEY=gsk_...
+MONGODB_URI=mongodb+srv://...
+VITE_API_URL=https://notice2action.onrender.com
 ```
 
 ### Development
@@ -80,29 +88,17 @@ npm run dev
 
 - Frontend: http://localhost:5173
 - Backend: http://localhost:5000
-
-Or run separately:
-
-```bash
-cd backend && npm run dev
-cd frontend && npm run dev
-```
-
-### Production Build
-
-```bash
-cd frontend && npm run build
-```
+- Live Production: https://notice2action.onrender.com
 
 ## Environment Variables
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `OPENAI_API_KEY` | OpenAI API key for notice analysis | Yes (except sample fallback) |
-| `OPENAI_MODEL` | Model to use (default: `gpt-4o-mini`) | No |
-| `MONGODB_URI` | MongoDB connection string | No |
-| `PORT` | Backend port (default: `5000`) | No |
-| `VITE_API_URL` | Backend URL for frontend (default: proxied in dev) | No |
+| Variable | Description | Default / Value |
+|----------|-------------|-----------------|
+| `OPENAI_API_KEY` | Groq or OpenAI API key for notice analysis | `gsk_...` |
+| `OPENAI_MODEL` | Model to use | `groq/compound` |
+| `MONGODB_URI` | MongoDB connection string | MongoDB Atlas URI |
+| `PORT` | Backend port | `5000` |
+| `VITE_API_URL` | Backend URL for frontend | `https://notice2action.onrender.com` |
 
 ## API Endpoints
 
@@ -115,17 +111,3 @@ cd frontend && npm run build
 | `GET` | `/api/history` | List saved analyses |
 | `GET` | `/api/history/:id` | Get single saved analysis |
 | `GET` | `/api/health` | Health check |
-
-## Limitations
-
-- **Text-based PDFs only** — scanned or image PDFs are not supported (no OCR)
-- **No authentication** — history is stored without user accounts
-- **AI output should be verified** — always check dates and requirements against the original notice
-- **Sample fallback** — predefined analyses are used only when a sample notice is submitted and the AI service fails
-
-## Demo Tips
-
-1. Click **Try a sample** to load a realistic university or government notice.
-2. Click **Analyze Notice** to see the full breakdown.
-3. Check off items in the action checklist.
-4. Expand **View original notice** to verify source transparency.
