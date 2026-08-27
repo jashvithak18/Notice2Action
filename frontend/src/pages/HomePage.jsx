@@ -34,6 +34,11 @@ export default function HomePage() {
   }, [location.state?.sampleId]);
 
   const handleAnalyze = async () => {
+    if (!text.trim() || text.trim().length < 50) {
+      setError('Please paste or upload a notice before analyzing.');
+      return;
+    }
+
     if (!isAuthenticated) {
       setAuthModalOpen(true);
       return;

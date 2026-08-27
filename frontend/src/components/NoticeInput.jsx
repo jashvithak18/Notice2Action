@@ -24,7 +24,16 @@ export default function NoticeInput({
   const [isUploading, setIsUploading] = useState(false);
 
   const charCount = text.length;
-  const canAnalyze = text.trim().length >= MIN_LENGTH && !isLoading && !isUploading;
+  const hasText = text.trim().length >= MIN_LENGTH;
+  const canAnalyze = hasText && !isLoading && !isUploading;
+
+  const buttonLabel = () => {
+    if (isLoading) return 'Analyzing…';
+    if (isUploading) return 'Uploading…';
+    if (!hasText) return 'Paste a notice first';
+    if (!isAuthenticated) return 'Sign in to Analyze';
+    return 'Analyze Notice';
+  };
 
   const handleFile = useCallback(
     async (file) => {
@@ -185,19 +194,11 @@ export default function NoticeInput({
         className="w-full sm:w-auto px-8 py-3 bg-accent hover:bg-accent-hover disabled:bg-border-strong disabled:text-ink-muted text-white font-medium text-sm rounded-lg transition-colors focus-ring disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
         aria-label="Analyze notice"
       >
-        {!isAuthenticated && <Lock className="w-4 h-4 text-white/80" />}
-        <span>
-          {isLoading
-            ? 'Analyzing…'
-            : isUploading
-            ? 'Uploading…'
-            : !isAuthenticated
-            ? 'Sign in to Analyze'
-            : 'Analyze Notice'}
-        </span>
+        {!isAuthenticated && hasText && <Lock className="w-4 h-4 text-white/80" />}
+        <span>{buttonLabel()}</span>
       </motion.button>
 
-      {!isAuthenticated && (
+      {!isAuthenticated && hasText && (
         <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200/80 rounded-lg px-3 py-2">
           🔒 Sign in required to run AI analysis and save notice history.
         </p>
