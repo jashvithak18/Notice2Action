@@ -1,11 +1,17 @@
-import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
 import dns from 'dns';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-dotenv.config({ path: path.resolve(__dirname, '../.env') });
+
+// Load .env in development environment if dotenv is available
+try {
+  const dotenv = await import('dotenv');
+  dotenv.default.config({ path: path.resolve(__dirname, '../.env') });
+} catch (_) {
+  // Production environment (Render/Railway/Vercel) already injects process.env variables natively
+}
 
 // Ensure DNS resolution fallback for MongoDB Atlas SRV lookup
 try {
