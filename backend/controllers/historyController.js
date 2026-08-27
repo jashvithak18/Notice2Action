@@ -1,7 +1,8 @@
 import { getHistory, getNoticeById } from '../services/noticeService.js';
 
 export async function listHistory(req, res) {
-  const notices = await getHistory();
+  const userId = req.user?._id || null;
+  const notices = await getHistory(userId);
   res.json(notices);
 }
 

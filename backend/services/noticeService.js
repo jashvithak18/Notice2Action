@@ -1,17 +1,23 @@
 import Notice from '../models/Notice.js';
 
-export async function saveNotice(rawText, analysis) {
+export async function saveNotice(rawText, analysis, userId = null) {
   try {
     if (!process.env.MONGODB_URI) return null;
 
-    const notice = await Notice.create({
+    const data = {
       rawText,
       summary: analysis.summary,
       deadlines: analysis.deadlines,
       eligibility: analysis.eligibility,
       checklist: analysis.checklist,
       quickTake: analysis.quickTake,
-    });
+    };
+
+    if (userId) {
+      data.user = userId;
+    }
+
+    const notice = await Notice.create(data);
     return notice;
   } catch (err) {
     console.warn('Failed to save notice to MongoDB:', err.message);
@@ -19,14 +25,16 @@ export async function saveNotice(rawText, analysis) {
   }
 }
 
-export async function getHistory(limit = 20) {
+export async function getHistory(userId = null, limit = 20) {
   try {
     if (!process.env.MONGODB_URI) return [];
 
-    const notices = await Notice.find()
+    const query = userId ? { user: userId } : {};
+
+    const notices = await Notice.find(query)
       .sort({ createdAt: -1 })
       .limit(limit)
-      .select('summary quickTake createdAt rawText deadlines eligibility checklist');
+      .select('summary quickTake createdAt rawText deadlines eligibility checklist user');
 
     return notices;
   } catch (err) {

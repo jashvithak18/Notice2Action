@@ -21,6 +21,7 @@ try {
 import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
+import authRoutes from './routes/auth.js';
 import analyzeRoutes from './routes/analyze.js';
 import uploadRoutes from './routes/upload.js';
 import historyRoutes from './routes/history.js';
@@ -40,6 +41,7 @@ app.get('/api/health', (_req, res) => {
   });
 });
 
+app.use('/api/auth', authRoutes);
 app.use('/api/analyze', analyzeRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/history', historyRoutes);

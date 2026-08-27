@@ -12,7 +12,8 @@ export async function analyze(req, res, next) {
     }
 
     const analysis = await analyzeNotice(validation.text, sampleId);
-    const saved = await saveNotice(validation.text, analysis);
+    const userId = req.user?._id || null;
+    const saved = await saveNotice(validation.text, analysis, userId);
 
     res.json({
       ...analysis,

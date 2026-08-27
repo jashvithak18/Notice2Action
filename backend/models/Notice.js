@@ -10,6 +10,11 @@ const deadlineSchema = new mongoose.Schema(
 
 const noticeSchema = new mongoose.Schema(
   {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: false,
+    },
     rawText: { type: String, required: true },
     summary: { type: String, required: true },
     deadlines: [deadlineSchema],
