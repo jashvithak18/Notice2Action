@@ -48,18 +48,28 @@ app.use('/api/upload', uploadRoutes);
 app.use('/api/history', historyRoutes);
 app.use('/api/samples', sampleRoutes);
 
-// Serve static frontend build if present (for single-service production deployments)
+// Serve static frontend build assets and handle SPA routing
 const frontendDist = path.resolve(__dirname, '../frontend/dist');
-if (fs.existsSync(frontendDist)) {
-  app.use(express.static(frontendDist));
-  app.get('*', (req, res, next) => {
-    if (req.path.startsWith('/api')) return next();
-    res.sendFile(path.join(frontendDist, 'index.html'));
-  });
-} else {
-  app.use(notFound);
-}
+app.use(express.static(frontendDist));
 
+app.get('/favicon.ico', (_req, res) => {
+  const icoPath = path.join(frontendDist, 'favicon.ico');
+  const svgPath = path.join(frontendDist, 'favicon.svg');
+  if (fs.existsSync(icoPath)) return res.sendFile(icoPath);
+  if (fs.existsSync(svgPath)) return res.sendFile(svgPath);
+  res.status(204).end();
+});
+
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api')) return next();
+  const indexPath = path.join(frontendDist, 'index.html');
+  if (fs.existsSync(indexPath)) {
+    return res.sendFile(indexPath);
+  }
+  next();
+});
+
+app.use(notFound);
 app.use(errorHandler);
 
 async function connectMongo() {
