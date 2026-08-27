@@ -4,6 +4,7 @@ import LandingPage from './pages/LandingPage';
 import HomePage from './pages/HomePage';
 import ResultsPage from './pages/ResultsPage';
 import HistoryPage from './pages/HistoryPage';
+import LoginPage from './pages/LoginPage';
 
 export default function App() {
   return (
@@ -16,6 +17,8 @@ export default function App() {
           <Route path="/app" element={<HomePage />} />
           <Route path="/results" element={<ResultsPage />} />
           <Route path="/history" element={<HistoryPage />} />
+          <Route path="/login" element={<LoginPage initialMode="login" />} />
+          <Route path="/register" element={<LoginPage initialMode="register" />} />
         </Routes>
       </div>
     </div>

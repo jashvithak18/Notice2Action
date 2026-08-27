@@ -12,14 +12,14 @@ export default function QuickTake({ quickTake }) {
   if (items.length === 0) return null;
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 bg-surface-muted rounded-xl border border-border">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 p-3.5 sm:p-4 bg-surface-muted rounded-xl border border-border">
       {items.map(({ key, label, value, icon: Icon }) => (
         <div key={key} className="min-w-0">
           <div className="flex items-center gap-1.5 text-xs font-medium text-ink-muted uppercase tracking-wide mb-1">
-            <Icon className="w-3.5 h-3.5" aria-hidden />
+            <Icon className="w-3.5 h-3.5 shrink-0" aria-hidden />
             {label}
           </div>
-          <p className="text-sm font-medium text-ink leading-snug">{value}</p>
+          <p className="text-sm font-medium text-ink leading-snug break-words">{value}</p>
         </div>
       ))}
     </div>

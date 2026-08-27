@@ -31,7 +31,7 @@ export default function OriginalNotice({ rawText }) {
             className="overflow-hidden"
           >
             <div className="px-4 pb-4 border-t border-border">
-              <pre className="mt-3 text-xs text-ink-secondary leading-relaxed whitespace-pre-wrap font-sans max-h-80 overflow-y-auto">
+              <pre className="mt-3 text-xs text-ink-secondary leading-relaxed whitespace-pre-wrap break-words overflow-x-hidden font-sans max-h-80 overflow-y-auto">
                 {rawText}
               </pre>
             </div>

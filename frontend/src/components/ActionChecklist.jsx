@@ -2,6 +2,10 @@ import { motion } from 'framer-motion';
 import { Check } from 'lucide-react';
 
 export default function ActionChecklist({ items, checked, onToggle, completedCount, total }) {
+  const validItems = (items || []).filter(
+    (item) => typeof item === 'string' && item.trim().length > 0
+  );
+
   return (
     <section aria-labelledby="checklist-heading" className="bg-surface-raised border border-border rounded-xl p-5 sm:p-6 shadow-soft">
       <div className="flex items-baseline justify-between gap-4 mb-5">
@@ -15,9 +19,9 @@ export default function ActionChecklist({ items, checked, onToggle, completedCou
         )}
       </div>
 
-      {items?.length > 0 ? (
+      {validItems.length > 0 ? (
         <ul className="space-y-1">
-          {items.map((item, index) => {
+          {validItems.map((item, index) => {
             const isChecked = !!checked[index];
             return (
               <motion.li
@@ -50,7 +54,7 @@ export default function ActionChecklist({ items, checked, onToggle, completedCou
                     </span>
                   </span>
                   <span
-                    className={`text-sm leading-relaxed transition-all ${
+                    className={`text-xs sm:text-sm leading-relaxed transition-all break-words ${
                       isChecked ? 'line-through text-ink-muted' : 'text-ink'
                     }`}
                   >

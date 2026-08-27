@@ -10,17 +10,21 @@ Given an official notice, your job is to convert bureaucratic language into clea
 Follow these rules strictly:
 1. Understand the actual purpose of the notice.
 2. Produce a concise plain-language summary (3–5 sentences maximum).
-3. Extract every EXPLICIT deadline or date that requires the recipient to take action. Do not infer deadlines from vague language like "as soon as possible" or "at your earliest convenience."
-4. Explain what each deadline refers to.
+3. Extract EVERY deadline, date, relative timeframe, or conditional time window that requires action. This includes:
+   a) Fixed calendar dates (e.g. "30 September 2026", "15 October 2026").
+   b) Relative timeframes (e.g. "45 days before renewal", "within 30 days of receipt", "within 15 days of notice").
+   c) Conditional deadlines tied to specific events or triggers (e.g. "within 15 days of notice if a claim over Rs 1,00,000 was made").
+   - For relative or conditional deadlines, state the time frame clearly in the "date" field (e.g. "45 days before renewal", "Within 15 days of notice") and explain the requirement and trigger condition in the "description" field.
+   - Never skip a deadline or requirement window simply because it is relative, pre-renewal, or conditional.
+4. Explain what each deadline refers to clearly.
 5. Extract eligibility requirements ONLY when explicitly stated in the notice.
-6. Convert requirements into concrete, executable action items for a checklist.
-7. Never invent information not present in the notice.
-8. Never assume the reader is eligible.
-9. Never create deadlines that aren't explicitly stated.
-10. If information is missing, use empty arrays or state in the summary that it is not stated — do not fabricate.
-11. Preserve important dates exactly as written in the notice.
-12. Keep checklist actions specific and executable (start with verbs like Download, Gather, Complete, Submit, Contact).
-13. Return valid JSON only — no markdown formatting, no commentary. The JSON output MUST match this structure:
+6. Convert requirements into concrete, executable action items for a checklist. Every checklist item MUST be a clear, non-empty actionable sentence starting with an imperative verb (e.g. Pay, Submit, Schedule, Confirm, Contact).
+7. NEVER return empty strings, blank strings, null, or placeholder items in array fields (checklist, deadlines, eligibility).
+8. Never invent information not present in the notice.
+9. Never assume the reader is eligible.
+10. If information is missing, use empty arrays — do not fabricate or return empty string elements.
+11. Preserve important dates and amounts exactly as written in the notice.
+12. Return valid JSON only matching this structure:
 {
   "summary": "string",
   "deadlines": [
@@ -35,12 +39,10 @@ Follow these rules strictly:
   }
 }
 
-Also include a "quickTake" object with ONLY fields you can extract from the notice:
-- "deadline": the most urgent explicit deadline in short form (e.g. "15 Sep 2026"), or omit
-- "action": the single most important action in a few words, or omit
-- "eligibility": a brief phrase describing who the notice applies to, or omit
-
-Do not include quickTake fields you cannot support from the notice text.`;
+Include a "quickTake" object with fields extracted from the notice:
+- "deadline": most urgent explicit or relative deadline in short form (e.g. "15 Sep 2026" or "45 days before renewal"), or omit
+- "action": single most important action in a few words, or omit
+- "eligibility": brief phrase describing who it applies to, or omit`;
 
 const JSON_SCHEMA = {
   type: 'object',
@@ -117,17 +119,19 @@ function normalizeDeadlines(deadlines) {
   if (!Array.isArray(deadlines)) return [];
   return deadlines
     .map((item) => {
-      if (typeof item === 'string') {
-        return { date: item, description: item };
+      if (typeof item === 'string' && item.trim()) {
+        return { date: item.trim(), description: item.trim() };
       }
       if (item && typeof item === 'object') {
-        const date = item.date || item.deadline || 'Specified Date';
-        const description = item.description || item.task || item.action || item.details || String(date);
-        return { date: String(date), description: String(description) };
+        const date = String(item.date || item.deadline || '').trim();
+        const description = String(item.description || item.task || item.action || item.details || date).trim();
+        if (date && description) {
+          return { date, description };
+        }
       }
       return null;
     })
-    .filter((d) => d && d.date && d.description);
+    .filter((d) => d && d.date && d.description && d.date.length > 0 && d.description.length > 0);
 }
 
 export function getSampleFallback(text, sampleId) {
@@ -153,7 +157,7 @@ export async function analyzeNotice(text, sampleId) {
   const isGroq = apiKey?.startsWith('gsk_') || process.env.OPENAI_BASE_URL?.includes('groq');
 
   const modelsToTry = isGroq
-    ? ['groq/compound-mini', 'openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'qwen/qwen3.8-27b']
+    ? ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'mixtral-8x7b-32768', 'gemma2-9b-it']
     : [process.env.OPENAI_MODEL || 'gpt-4o-mini', 'gpt-4o'];
 
   let lastErr = null;
@@ -223,15 +227,15 @@ export async function analyzeNotice(text, sampleId) {
         throw new Error('AI returned malformed data. Please try again.');
       }
 
-      if (parsed.deadlines) {
-        parsed.deadlines = normalizeDeadlines(parsed.deadlines);
-      }
-      if (!Array.isArray(parsed.eligibility)) {
-        parsed.eligibility = parsed.eligibility ? [String(parsed.eligibility)] : [];
-      }
-      if (!Array.isArray(parsed.checklist)) {
-        parsed.checklist = parsed.checklist ? [String(parsed.checklist)] : [];
-      }
+      parsed.deadlines = normalizeDeadlines(parsed.deadlines);
+
+      parsed.eligibility = (Array.isArray(parsed.eligibility) ? parsed.eligibility : [parsed.eligibility])
+        .map((s) => String(s || '').trim())
+        .filter((s) => s.length > 0);
+
+      parsed.checklist = (Array.isArray(parsed.checklist) ? parsed.checklist : [parsed.checklist])
+        .map((s) => String(s || '').trim())
+        .filter((s) => s.length > 0);
 
       parsed.quickTake = cleanQuickTake(parsed.quickTake);
 

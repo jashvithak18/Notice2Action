@@ -98,10 +98,10 @@ export default function NoticeInput({
             if (fileName) onFileNameChange('');
           }}
           placeholder="Paste your notice here…"
-          rows={12}
+          rows={10}
           disabled={isLoading || isUploading}
           aria-label="Notice text"
-          className="w-full px-4 sm:px-5 py-4 bg-transparent text-ink placeholder:text-ink-muted resize-y min-h-[240px] text-[15px] leading-relaxed focus:outline-none rounded-xl disabled:opacity-60"
+          className="w-full px-3.5 sm:px-5 py-3.5 bg-transparent text-ink placeholder:text-ink-muted resize-y min-h-[180px] sm:min-h-[240px] text-sm sm:text-[15px] leading-relaxed focus:outline-none rounded-xl disabled:opacity-60"
         />
 
         <div className="flex flex-wrap items-center justify-between gap-2 px-4 sm:px-5 pb-3 border-t border-border">
@@ -210,9 +210,9 @@ export default function NoticeInput({
         </p>
       )}
 
-      {text.trim().length >= MIN_LENGTH && text.length > 12000 && (
+      {text.trim().length >= MIN_LENGTH && text.length > 45000 && (
         <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200/80 rounded-lg px-3 py-2">
-          ⚠️ Long notice detected — only the first 15,000 characters will be sent for analysis.
+          ⚠️ Very long notice detected — the first 50,000 characters will be sent for analysis.
         </p>
       )}
     </div>

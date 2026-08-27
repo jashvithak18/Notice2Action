@@ -23,10 +23,13 @@ export default function ResultsPage() {
   const navigate = useNavigate();
   const result = location.state?.result;
 
+  const sanitizedChecklist = (result?.checklist || []).filter(
+    (item) => typeof item === 'string' && item.trim().length > 0
+  );
   const noticeKey = result ? createNoticeKey(result.rawText) : '';
   const { checked, toggle, completedCount, total } = useChecklist(
     noticeKey,
-    result?.checklist || []
+    sanitizedChecklist
   );
 
   useEffect(() => {
@@ -38,14 +41,14 @@ export default function ResultsPage() {
   if (!result) return null;
 
   return (
-    <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+    <main className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-12">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
       >
-        <div className="mb-8">
-          <p className="text-xs font-medium text-accent uppercase tracking-wide mb-2">
+        <div className="mb-6 sm:mb-8">
+          <p className="text-xs font-medium text-accent uppercase tracking-wide mb-1.5 sm:mb-2">
             Notice analyzed
           </p>
           <h1 className="font-display text-2xl sm:text-3xl font-semibold text-ink tracking-tight">
@@ -53,7 +56,7 @@ export default function ResultsPage() {
           </h1>
         </div>
 
-        <motion.div custom={0} variants={sectionVariants} initial="hidden" animate="visible" className="mb-8">
+        <motion.div custom={0} variants={sectionVariants} initial="hidden" animate="visible" className="mb-6 sm:mb-8">
           <QuickTake quickTake={result.quickTake} />
         </motion.div>
 
@@ -62,20 +65,20 @@ export default function ResultsPage() {
           variants={sectionVariants}
           initial="hidden"
           animate="visible"
-          className="mb-10"
+          className="mb-8 sm:mb-10"
           aria-labelledby="summary-heading"
         >
-          <h2 id="summary-heading" className="font-display text-lg font-semibold text-ink mb-3">
+          <h2 id="summary-heading" className="font-display text-lg font-semibold text-ink mb-2.5 sm:mb-3">
             What this means
           </h2>
-          <p className="text-[15px] text-ink-secondary leading-relaxed">
+          <p className="text-sm sm:text-[15px] text-ink-secondary leading-relaxed break-words">
             {result.summary}
           </p>
         </motion.section>
 
-        <motion.div custom={2} variants={sectionVariants} initial="hidden" animate="visible" className="mb-10">
+        <motion.div custom={2} variants={sectionVariants} initial="hidden" animate="visible" className="mb-8 sm:mb-10">
           <ActionChecklist
-            items={result.checklist}
+            items={sanitizedChecklist}
             checked={checked}
             onToggle={toggle}
             completedCount={completedCount}
@@ -83,7 +86,7 @@ export default function ResultsPage() {
           />
         </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-10 mb-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-10 mb-8 sm:mb-10">
           <motion.div custom={3} variants={sectionVariants} initial="hidden" animate="visible">
             <DeadlinesSection deadlines={result.deadlines} />
           </motion.div>
@@ -97,10 +100,10 @@ export default function ResultsPage() {
           <OriginalNotice rawText={result.rawText} />
         </motion.div>
 
-        <div className="flex flex-wrap items-center gap-4 mb-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-6">
           <Link
-            to="/"
-            className="inline-flex items-center px-5 py-2.5 bg-accent hover:bg-accent-hover text-white text-sm font-medium rounded-lg transition-colors focus-ring"
+            to="/analyze"
+            className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-accent hover:bg-accent-hover text-white text-sm font-medium rounded-lg transition-colors focus-ring shadow-soft"
           >
             Analyze another notice
           </Link>

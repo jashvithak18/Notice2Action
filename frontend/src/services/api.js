@@ -42,9 +42,8 @@ export async function getMeUser() {
   return handleResponse(response);
 }
 
-// Hard-limit to 15 000 chars (≈ 15 KB) before sending.
-// Official notices are rarely longer; this keeps payloads tiny on every platform.
-const MAX_TEXT_CHARS = 15_000;
+// Support up to 50,000 characters so long notices (1,400+ lines) retain all notice content.
+const MAX_TEXT_CHARS = 50_000;
 
 export async function analyzeNotice(text, sampleId) {
   const safeText = typeof text === 'string' ? text.slice(0, MAX_TEXT_CHARS) : text;

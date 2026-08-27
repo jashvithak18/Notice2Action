@@ -31,12 +31,12 @@ export default function HistoryPage() {
   }, []);
 
   return (
-    <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-      <header className="mb-8">
+    <main className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-12">
+      <header className="mb-6 sm:mb-8">
         <h1 className="font-display text-2xl sm:text-3xl font-semibold text-ink tracking-tight">
           History
         </h1>
-        <p className="mt-2 text-sm text-ink-secondary">
+        <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm text-ink-secondary">
           Previously analyzed notices saved on this device&apos;s server session.
         </p>
       </header>
@@ -48,18 +48,18 @@ export default function HistoryPage() {
       {error && (
         <div className="text-sm text-ink-secondary bg-surface-muted border border-border rounded-lg px-4 py-3">
           <p>{error === 'Something went wrong. Please try again.' ? 'History is unavailable — MongoDB may not be connected.' : error}</p>
-          <Link to="/" className="text-accent hover:text-accent-hover font-medium mt-2 inline-block">
+          <Link to="/analyze" className="text-accent hover:text-accent-hover font-medium mt-2 inline-block">
             Analyze a notice instead
           </Link>
         </div>
       )}
 
       {!loading && !error && notices.length === 0 && (
-        <div className="text-center py-16">
+        <div className="text-center py-12 sm:py-16">
           <p className="text-ink-secondary text-sm mb-4">No analyzed notices yet.</p>
           <Link
-            to="/"
-            className="inline-flex items-center px-5 py-2.5 bg-accent hover:bg-accent-hover text-white text-sm font-medium rounded-lg transition-colors focus-ring"
+            to="/analyze"
+            className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-accent hover:bg-accent-hover text-white text-sm font-medium rounded-lg transition-colors focus-ring shadow-soft"
           >
             Analyze your first notice
           </Link>

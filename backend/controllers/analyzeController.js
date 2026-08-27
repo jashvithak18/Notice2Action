@@ -2,8 +2,8 @@ import { analyzeNotice } from '../services/aiService.js';
 import { saveNotice } from '../services/noticeService.js';
 import { validateNoticeText } from '../utils/validation.js';
 
-// Hard-limit to 15 000 chars (≈ 15 KB). Official notices rarely exceed this.
-const MAX_TEXT_CHARS = 15_000;
+// Allow up to 50,000 characters for long 1400+ line notices
+const MAX_TEXT_CHARS = 50_000;
 
 export async function analyze(req, res, next) {
   try {

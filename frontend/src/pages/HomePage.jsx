@@ -31,16 +31,27 @@ export default function HomePage() {
       .catch(() => {
         /* samples optional if backend down */
       });
-  }, [location.state?.sampleId]);
 
-  const handleAnalyze = async () => {
-    if (!text.trim() || text.trim().length < 50) {
+    if (location.state?.noticeText) {
+      setText(location.state.noticeText);
+    }
+  }, [location.state]);
+
+  const handleAnalyze = async (overrideText) => {
+    const targetText = typeof overrideText === 'string' ? overrideText : text;
+    if (!targetText.trim() || targetText.trim().length < 50) {
       setError('Please paste or upload a notice before analyzing.');
       return;
     }
 
     if (!isAuthenticated) {
-      setAuthModalOpen(true);
+      navigate('/login', {
+        state: {
+          noticeText: targetText,
+          sampleId: activeSampleId,
+          from: '/analyze',
+        },
+      });
       return;
     }
 
@@ -48,7 +59,7 @@ export default function HomePage() {
     setIsLoading(true);
 
     try {
-      const result = await analyzeNotice(text, activeSampleId || undefined);
+      const result = await analyzeNotice(targetText, activeSampleId || undefined);
       navigate('/results', { state: { result } });
     } catch (err) {
       setError(err.message);
@@ -70,17 +81,17 @@ export default function HomePage() {
   };
 
   return (
-    <main className="max-w-3xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
+    <main className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-16">
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
       >
-        <header className="mb-10 sm:mb-12">
-          <h1 className="font-display text-3xl sm:text-4xl font-semibold text-ink tracking-tight leading-tight">
+        <header className="mb-6 sm:mb-10">
+          <h1 className="font-display text-2xl sm:text-4xl font-semibold text-ink tracking-tight leading-tight">
             Turn confusing notices into clear next steps.
           </h1>
-          <p className="mt-3 text-ink-secondary text-base sm:text-lg leading-relaxed max-w-xl">
+          <p className="mt-2.5 sm:mt-3 text-ink-secondary text-sm sm:text-lg leading-relaxed max-w-xl">
             Paste or upload an official notice — we&apos;ll extract deadlines,
             eligibility, and a checklist of what you need to do.
           </p>
@@ -103,7 +114,7 @@ export default function HomePage() {
               samples={samples}
               onLoadSample={handleLoadSample}
               isAuthenticated={isAuthenticated}
-              onRequireAuth={() => setAuthModalOpen(true)}
+              onRequireAuth={() => navigate('/login', { state: { noticeText: text, from: '/analyze' } })}
             />
 
             {error && (
