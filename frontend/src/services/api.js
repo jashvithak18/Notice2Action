@@ -42,9 +42,9 @@ export async function getMeUser() {
   return handleResponse(response);
 }
 
-// Render's nginx proxy has a ~1MB body ceiling. Truncate to 80 000 chars
-// (≈ 80 KB) before sending — no real notice needs more than that.
-const MAX_TEXT_CHARS = 80_000;
+// Hard-limit to 15 000 chars (≈ 15 KB) before sending.
+// Official notices are rarely longer; this keeps payloads tiny on every platform.
+const MAX_TEXT_CHARS = 15_000;
 
 export async function analyzeNotice(text, sampleId) {
   const safeText = typeof text === 'string' ? text.slice(0, MAX_TEXT_CHARS) : text;

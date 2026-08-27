@@ -31,9 +31,26 @@ import { errorHandler, notFound } from './middleware/errorHandler.js';
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors());
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
+const ALLOWED_ORIGINS = [
+  'https://notice2-action.vercel.app',
+  'https://notice2action.onrender.com',
+  'http://localhost:5173',
+  'http://localhost:3000',
+];
+
+app.use(cors({
+  origin: (origin, cb) => {
+    // Allow requests with no origin (curl, Postman) or from allowed list
+    if (!origin || ALLOWED_ORIGINS.some(o => origin.startsWith(o))) {
+      return cb(null, true);
+    }
+    cb(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+}));
+// Body text is pre-truncated on the frontend to 15 KB; 2 MB covers all cases.
+app.use(express.json({ limit: '2mb' }));
+app.use(express.urlencoded({ limit: '2mb', extended: true }));
 
 app.get('/api/health', (_req, res) => {
   res.json({
